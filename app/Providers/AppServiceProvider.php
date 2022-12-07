@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        URL::forceScheme('https');
+        // if APP_URL contains https
+        if (strpos(env('APP_URL'), 'https') === 0) {
+            // force https
+            URL::forceScheme('https');
+        }
     }
 }
