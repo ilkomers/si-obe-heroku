@@ -20,6 +20,6 @@
     RewriteRule ^ index.php [L]
     
     # Force SSL
-    RewriteCond %{ENV:HTTPS} !on
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https 
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
