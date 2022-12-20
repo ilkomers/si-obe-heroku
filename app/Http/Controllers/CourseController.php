@@ -55,7 +55,7 @@ class CourseController extends Controller
             'name' => 'required|string',
             'course_credit' => 'required|integer',
             'lab_credit' => 'required|integer',
-            'type' => 'in:Mandatory,Elective',
+            'type' => 'required|in:Mandatory,Elective',
             'short_description' => 'string',
             'minimal_requirement' => 'string',
             'study_material_summary' => 'string',
@@ -99,7 +99,7 @@ class CourseController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\Course  $course
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function edit(Course $course)
     {

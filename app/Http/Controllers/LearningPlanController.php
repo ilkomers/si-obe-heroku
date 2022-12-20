@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\Syllabus;
 use App\Models\LearningPlan;
 use App\Models\LessonLearningOutcome;
@@ -13,23 +16,20 @@ class LearningPlanController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function index($syllabus)
+    public function index(Syllabus $syllabus)
     {
-        $plan = LearningPlan::with("lessonLearningOutcome")->where('syllabus_id', $syllabus)->paginate(5);
-        $syllabus = Syllabus::find($syllabus);
         return view('learning-plans.index', [
             'syllabus' => $syllabus,
-            'plans' => $plan
+            'learningPlans' => $syllabus->learningPlans()->paginate(10)
         ]);
-
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function create(Syllabus $syllabus)
     {
@@ -43,8 +43,8 @@ class LearningPlanController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request, Syllabus $syllabus)
     {
@@ -59,49 +59,37 @@ class LearningPlanController extends Controller
         $syllabus->learningPlans()->create($validated);
 
         return redirect()->route('syllabi.learning-plans.index', [
-            'syllabus'=>$syllabus
+            'syllabus' => $syllabus
         ]);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show()
-    {
-
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @param Syllabus $syllabus
+     * @param LearningPlan $learningPlan
+     * @return Application|Factory|View
      */
-    public function edit($syllabus, $plan)
+    public function edit(Syllabus $syllabus, LearningPlan $learningPlan)
     {
-        $plan = LearningPlan::find($plan);
-        $llos = LessonLearningOutcome::all();
-        return  view('learning-plans.edit', [
+        return view('learning-plans.edit', [
             'syllabus' => $syllabus,
-            'plan' => $plan,
-            'llos' => $llos
+            'learningPlan' => $learningPlan,
+            'llos' => LessonLearningOutcome::all()
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param Syllabus $syllabus
+     * @param LearningPlan $learningPlan
+     * @return RedirectResponse
      */
-    public function update(Request $request, $syllabus, $plan)
+    public function update(Request $request, Syllabus $syllabus, LearningPlan $learningPlan)
     {
         $validated = $request->validate([
-            'syllabus_id' => 'required|numeric',
             'llo_id' => 'required|numeric',
             'week_number' => 'required|integer',
             'study_material' => 'required|string',
@@ -109,34 +97,23 @@ class LearningPlanController extends Controller
             'estimated_time' => 'required|string'
         ]);
 
-        $plan = LearningPlan::find($plan);
-
-        $plan->syllabus_id = $validated['syllabus_id'];
-        $plan->llo_id = $validated['llo_id'];
-        $plan->week_number = $validated['week_number'];
-        $plan->study_material = $validated['study_material'];
-        $plan->learning_method = $validated['learning_method'];
-        $plan->estimated_time = $validated['estimated_time'];
-
-        $plan->save();
+        $learningPlan->update($validated);
 
         return redirect()->route('syllabi.learning-plans.index', [
             'syllabus' => $syllabus,
-    ]);
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Syllabus $syllabus
+     * @param LearningPlan $learningPlan
+     * @return RedirectResponse
      */
-    public function destroy($syllabus, $plan)
+    public function destroy(Syllabus $syllabus, LearningPlan $learningPlan)
     {
-        $del = LearningPlan::where('id', $plan)->delete();
-        
-        return redirect()->route('syllabi.learning-plans.index', [
-            'syllabus' => $syllabus
-        ]);
+        $learningPlan->delete();
+        return back();
     }
 }

@@ -16,15 +16,11 @@ class CriteriaLevelController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return Application|Factory|View
+     * @return void
      */
-    public function index(Rubric $rubric, Criteria $criteria)
+    public function index()
     {
-        return view('criteria-levels.index', [
-            'rubric' => $rubric,
-            'criteria' => $criteria,
-            'criteriaLevels' => $criteria->criteriaLevels()->paginate(3)
-        ]);
+        abort(404);
     }
 
     /**
@@ -51,31 +47,30 @@ class CriteriaLevelController extends Controller
         $validated = $request->validate([
             'point' => 'required|numeric',
             'title' => 'required|string',
-            'description' => 'string',
+            'description' => 'nullable|string',
         ]);
 
         $criteria->criteriaLevels()->create($validated);
 
-        return redirect()->route('rubrics.criterias.criteria-levels.index', [
-            'rubric' => $rubric,
-            'criteria' => $criteria,
-        ]);
+        $currentMaxPoint = $criteria->criteriaLevels()->max('point');
+        if ($currentMaxPoint != $criteria->max_point) {
+            $criteria->update([
+                'max_point' => $currentMaxPoint
+            ]);
+        }
+
+        return redirect()->route('rubrics.show', $rubric);
     }
 
     /**
      * Display the specified resource.
      *
      * @param Rubric $rubric
-     * @param Criteria $criteria
-     * @param CriteriaLevel $criteriaLevel
      * @return RedirectResponse
      */
-    public function show(Rubric $rubric, Criteria $criteria, CriteriaLevel $criteriaLevel)
+    public function show(Rubric $rubric)
     {
-        return redirect()->route('rubrics.criterias.criteria-levels.index', [
-            'rubric' => $rubric,
-            'criteria' => $criteria,
-        ]);
+        return redirect()->route('rubrics.show', $rubric);
     }
 
     /**
@@ -109,7 +104,7 @@ class CriteriaLevelController extends Controller
         $validated = $request->validate([
             'point' => 'required|numeric',
             'title' => 'required|string',
-            'description' => 'string',
+            'description' => 'nullable|string',
         ]);
 
         $criteriaLevel->update($validated);
@@ -121,10 +116,7 @@ class CriteriaLevelController extends Controller
             ]);
         }
 
-        return redirect()->route('rubrics.criterias.criteria-levels.index', [
-            'rubric' => $rubric,
-            'criteria' => $criteria
-        ]);
+        return redirect()->route('rubrics.show', $rubric);
     }
 
     /**
@@ -138,10 +130,6 @@ class CriteriaLevelController extends Controller
     public function destroy(Rubric $rubric, Criteria $criteria, CriteriaLevel $criteriaLevel)
     {
         $criteriaLevel->delete();
-        
-        return redirect()->route('rubrics.criterias.criteria-levels.index', [
-            'rubric' => $rubric,
-            'criteria' => $criteria
-        ]);
+        return back();
     }
 }
