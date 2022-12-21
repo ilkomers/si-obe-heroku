@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentPlanController;
+use App\Http\Controllers\AssignmentPlanTasksController;
 use App\Http\Controllers\ClassPortofolioController;
 use App\Http\Controllers\CourseClassController;
 use App\Http\Controllers\CourseController;
@@ -79,7 +80,8 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
                 Route::resource('syllabi.clos', CourseLearningOutcomeController::class)->except(['show', 'index']);
                 Route::resource('syllabi.llos', LessonLearningOutcomeController::class)->except(['show', 'index']);
                 Route::resource('syllabi.learning-plans', LearningPlanController::class);
-                Route::resource('syllabi.assignment-plans', AssignmentPlanController::class);
+                Route::resource('syllabi.assignment-plans', AssignmentPlanController::class)->except(['show', 'index']);
+                Route::resource('syllabi.assignment-plans.assignment-plan-tasks', AssignmentPlanTasksController::class)->except(['show', 'index']);
                 Route::resource('rubrics.criterias', CriteriaController::class);
                 Route::resource('rubrics.criterias.criteria-levels', CriteriaLevelController::class);
             });
