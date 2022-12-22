@@ -319,7 +319,18 @@
         <div class="pt-5">
             <div class="flex flex-row justify-between mb-3 sm:px-0 -mr-2 sm:-mr-3">
                 <h2 class="text-xl font-extrabold px-2 py-1">
-                    {{ __('Assignment Plan') }}
+                    <?php
+                        // count total max_point from criteria in each assignmentPlanTasks
+                        $totalMaxPoint = 0;
+                        $assignmentPlans = $syllabus->assignmentPlans;
+                        foreach ($assignmentPlans as $assignmentPlan) {
+                            $assignmentPlanTasks = $assignmentPlan->assignmentPlanTasks;
+                            foreach ($assignmentPlanTasks as $assignmentPlanTask) {
+                                $totalMaxPoint += $assignmentPlanTask->criteria->max_point ?? 0;
+                            }
+                        }
+                    ?>
+                    {{ __('Assignment Plan') }} <span class="badge badge-primary p-4">{{ $assignmentPlans->count() }} assignment(s) with {{ $totalMaxPoint }} collectible point(s)</span>
                 </h2>
                 <div class="order-5 sm:order-6 mr-2 sm:mr-3">
                     <x-button-link href="{{ route('syllabi.assignment-plans.create', $syllabus) }}">
@@ -466,13 +477,11 @@
 
                                     <div class="flex flex-row justify-between py-6">
                                         <p class="font-semibold">{{ __("Assignment Plan Tasks") }}</p>
-                                        @unless(empty($assignmentPlan->rubric))
                                         <div class="order-5">
                                             <x-button-link href="{{ route('syllabi.assignment-plans.assignment-plan-tasks.create', [$syllabus, $assignmentPlan]) }}">
                                                 <i class="fa fa-plus"></i> {{ __('Create New Task') }}
                                             </x-button-link>
                                         </div>
-                                        @endunless
                                     </div>
                                     @if($assignmentPlanTasks->count() > 0)
                                         <div class="mb-5 overflow-x-auto bg-white rounded-lg shadow overflow-y-auto relative">
@@ -531,16 +540,9 @@
                                             </table>
                                         </div>
                                     @else
-                                        @if(empty($assignmentPlan->rubric))
-                                            <div class="flex flex-col items-center justify-center">
-                                                <p class="text-center text-gray-500">{{ __("No assignment plan tasks yet.") }}</p>
-                                                <p class="text-center text-gray-500">{{ __("Please create a rubric first.") }}</p>
-                                            </div>
-                                        @else
-                                        <div class="text-center p-8">
-                                            <p class="text-gray-600">No tasks available</p>
+                                        <div class="p-8">
+                                            <p class="text-center text-gray-500">{{ __("No assignment plan tasks yet.") }}</p>
                                         </div>
-                                        @endif
                                     @endif
                                 </div>
                             </div>
